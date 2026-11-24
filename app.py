@@ -11,6 +11,8 @@ import urllib.request
 BASE = os.path.dirname(os.path.abspath(__file__))
 WORKER_URL = os.environ.get(
     "WORKER_URL", "http://se-sto02.tryaltare.ai:25946").rstrip("/")
+# 処理役と同じ合言葉。環境変数 FACTORY_TOKEN で渡す
+TOKEN = os.environ.get("FACTORY_TOKEN", "")
 LEDGER_FILE = os.path.join(BASE, "ledger.csv")
 STATE_FILE = os.path.join(BASE, "test_state.json")
 REWARD_PER_ITEM = 10  # 試し用の仮単価（円/件）。本物の仕事が決まったら実単価に変える
@@ -18,8 +20,11 @@ REWARD_PER_ITEM = 10  # 試し用の仮単価（円/件）。本物の仕事が�
 
 def http_json(method, url, obj=None):
     data = json.dumps(obj).encode("utf-8") if obj is not None else None
+    headers = {"Content-Type": "application/json"}
+    if TOKEN:
+        headers["X-Factory-Token"] = TOKEN
     req = urllib.request.Request(url, data=data, method=method,
-                                 headers={"Content-Type": "application/json"})
+                                 headers=headers)
     with urllib.request.urlopen(req, timeout=30) as res:
         return json.loads(res.read().decode("utf-8"))
 
